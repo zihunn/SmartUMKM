@@ -27,20 +27,17 @@ class InvoiceResource extends Resource
     {
         return $form
             ->schema([
-                // Field untuk invoice_number
                 Forms\Components\TextInput::make('invoice_number')
                     ->label('Nomor Invoice')
                     ->required()
                     ->maxLength(255),
 
-                // Field untuk amount (jumlah) - hanya angka
                 Forms\Components\TextInput::make('amount')
                     ->label('Jumlah')
                     ->required()
-                    ->numeric() // Validasi agar hanya angka yang diterima
-                    ->minValue(0), // Menambahkan validasi agar tidak bisa negatif
+                    ->numeric() 
+                    ->minValue(0),
 
-                // Status
                 Forms\Components\Select::make('status')
                     ->label('Status')
                     ->options([
@@ -51,16 +48,14 @@ class InvoiceResource extends Resource
                     ->default('unpaid')
                     ->required(),
 
-                // Field untuk memilih client (client_id)
                 Forms\Components\Select::make('client_id')
                     ->label('Client')
                     ->relationship('client', 'name')
                     ->required()
                     ->searchable()
                     ->placeholder('Pilih Client')
-                    ->reactive() // Menjadikan field ini reaktif
+                    ->reactive() 
                     ->afterStateUpdated(function ($state, $set) {
-                        // Setelah memilih client, set project_id menjadi null agar tidak ada pilihan sebelumnya
                         $set('project_id', null);
                     }),
 
@@ -70,15 +65,12 @@ class InvoiceResource extends Resource
                     ->required()
                     ->placeholder('Pilih Project (silahkan pilih client terlebih dahulu)')
                     ->options(function ($get) {
-                        // Mendapatkan client_id yang dipilih
                         $clientId = $get('client_id');
 
-                        // Jika client_id dipilih, tampilkan proyek terkait dengan client tersebut
                         if ($clientId) {
                             $projects = \App\Models\Project::where('client_id', $clientId)
                                 ->pluck('name', 'id');
 
-                            // Jika tidak ada proyek, kembalikan array dengan pesan khusus
                             if ($projects->isEmpty()) {
                                 return [
                                     '' => 'Belum ada project',
@@ -88,7 +80,6 @@ class InvoiceResource extends Resource
                             return $projects;
                         }
 
-                        // Jika tidak ada client yang dipilih, kembalikan array kosong
                         return [
                             '' => 'Pilih client terlebih dahulu',
                         ];
