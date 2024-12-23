@@ -19,9 +19,63 @@ class InvoiceRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('name')
+                Forms\Components\TextInput::make('invoice_number')
+                    ->label('Nomor Invoice')
                     ->required()
                     ->maxLength(255),
+
+                Forms\Components\TextInput::make('amount')
+                    ->label('Jumlah')
+                    ->required()
+                    ->numeric()
+                    ->minValue(0),
+
+                Forms\Components\Select::make('status')
+                    ->label('Status')
+                    ->options([
+                        'unpaid' => 'Belum Dibayar',
+                        'paid' => 'Sudah Dibayar',
+                        'overdue' => 'Terlambat',
+                    ])
+                    ->default('unpaid')
+                    ->required(),
+
+                Forms\Components\Select::make('client_id')
+                    ->label('Client')
+                    ->relationship('client', 'name')
+                    ->required()
+                    ->searchable()
+                    ->placeholder('Pilih Client')
+                    ->reactive()
+                    ->afterStateUpdated(function ($state, $set) {
+                        $set('project_id', null);
+                    }),
+
+                Forms\Components\Select::make('project_id')
+                    ->label('Proyek')
+                    ->relationship('project', 'name')
+                    ->required()
+                    ->placeholder('Pilih Project (silahkan pilih client terlebih dahulu)')
+                    ->options(function ($get) {
+                        $clientId = $get('client_id');
+
+                        if ($clientId) {
+                            $projects = \App\Models\Project::where('client_id', $clientId)
+                                ->pluck('name', 'id');
+
+                            if ($projects->isEmpty()) {
+                                return [
+                                    '' => 'Belum ada project',
+                                ];
+                            }
+
+                            return $projects;
+                        }
+
+                        return [
+                            '' => 'Pilih client terlebih dahulu',
+                        ];
+                    })
             ]);
     }
 

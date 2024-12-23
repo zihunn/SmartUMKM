@@ -11,8 +11,8 @@ use Filament\Resources\RelationManagers\RelationManager;
 
 class ProjectRelationManager extends RelationManager
 {
-    protected static string $relationship = 'projects'; // Nama relasi di model Client
-    protected static ?string $recordTitleAttribute = 'name'; // Nama proyek sebagai judul
+    protected static string $relationship = 'projects';
+    protected static ?string $recordTitleAttribute = 'name';
 
     public function form(Form $form): Form
     {
